@@ -1,0 +1,80 @@
+services:
+    web:
+        build:
+            context: ./
+            dockerfile: ./Dockerfile
+        image: tajrobe
+        restart: always
+        working_dir: /app
+        ports:
+            - 8080:8089
+        volumes:
+            - ./:/app
+        depends_on:
+            - mysql
+            - redis
+        networks:
+            - app
+        environment:
+            APP_KEY: '${APP_KEY}'
+            APP_DEBUG: '${APP_DEBUG}'
+            RESPONSE_CACHE_ENABLED: '${RESPONSE_CACHE_ENABLED}'
+            DB_DATABASE: '${DB_DATABASE}'
+            DB_USERNAME: '${DB_USERNAME}'
+            DB_PASSWORD: '${DB_PASSWORD}'
+            DB_HOST: "mysql"
+            JWT_SECRET: "${JWT_SECRET}"
+            JWT_ALGO: "HS256"
+            REDIS_CLIENT: '${REDIS_CLIENT}'
+            REDIS_HOST: "redis"
+            REDIS_PORT: 6379
+
+    mysql:
+        image: mysql:latest
+        container_name: dev_mysql
+        restart: always
+        ports:
+            - "3306:3306"
+        volumes:
+            - ./dump.sql:/docker-entrypoint-initdb.d/dump.sql
+        environment:
+            MYSQL_DATABASE: '${DB_DATABASE}'
+            MYSQL_USER: '${DB_USERNAME}'
+            MYSQL_PASSWORD: '${DB_PASSWORD}'
+            MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
+        networks:
+            - app
+
+    phpmyadmin:
+        image: phpmyadmin/phpmyadmin
+        container_name: "dev_phpmyadmin"
+        restart: always
+        ports:
+            - 9090:80
+        environment:
+            PMA_HOST: mysql
+            PMA_PORT: 3306
+        networks:
+            - app
+
+    redis:
+        image: redis:7.0.15-alpine3.20
+        restart: always
+        command: [ "redis-server", "--appendonly", "yes" ]
+        volumes:
+            - ./docker/redis/data:/data
+        ports:
+            - 6379:6379
+        networks:
+            - app
+        healthcheck:
+            test:
+                - CMD
+                - redis-cli
+                - ping
+            retries: 3
+            timeout: 5s
+
+networks:
+    app:
+        driver: bridge
