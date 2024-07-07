@@ -25,3 +25,16 @@
 بازگو کردن تجربه = شفافیت 🥂
 
 منبع متن: جاب‌گای خدا بیامرز 🪦
+
+### نصب روی لوکال
+
+```bash
+git@github.com:tajrobewiki/api.git
+cd api
+composer install
+cp .env.example .env
+docker compose up
+
+# example endpoint:
+# http://localhost:8080/api/client/review
+```
