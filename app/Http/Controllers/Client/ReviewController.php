@@ -42,9 +42,9 @@ class ReviewController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(int $id)
+    public function show(Request $request, $id)
     {
-        return $this->reviewService->getReview($id);
+        return $this->reviewService->getReview($request, $id);
     }
 
     /**

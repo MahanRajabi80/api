@@ -46,12 +46,19 @@ class ReviewService
         return $this->okResponse($reviews);
     }
 
-    public function getReview(string $id)
+    public function getReview(Request $request, $id)
     {
-        $review = Review::with('company:id,slug,name')
-            ->where('id', $id)
-            ->where('status', 'PUBLISH')
-            ->first();
+        $key = $request->input('key');
+
+        $reviewQuery = Review::with('company:id,slug,name')->where('id', $id);
+
+        $reviewQuery->when($key, function ($query) use ($key) {
+            $query->where('edit_key', $key);
+        }, function ($query) {
+            $query->where('status', 'PUBLISH');
+        });
+
+        $review = $reviewQuery->first();
 
         if (!$review) {
             return $this->notFoundResponse('', 'این تجربه وجود ندارد.', true);
