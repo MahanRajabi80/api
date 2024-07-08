@@ -52,11 +52,11 @@ class ReviewService
 
         $reviewQuery = Review::with('company:id,slug,name')->where('id', $id);
 
-        $reviewQuery->when($key, function ($query) use ($key) {
-            $query->where('edit_key', $key);
-        }, function ($query) {
-            $query->where('status', 'PUBLISH');
-        });
+        $reviewQuery->when(
+            $key,
+            fn($query) => $query->where('edit_key', $key),
+            fn($query) => $query->where('status', 'PUBLISH')
+        );
 
         $review = $reviewQuery->first();
 
